@@ -101,8 +101,60 @@ app.delete("/todos/:id", async (req, res, next) => {
   }
 });
 
+//TODO Update todo :PUT /todos
+
+app.put("/todos/:id", async (req, res, next) => {
+  try {
+    const params = req.params;
+    const todos = await readTodos();
+    const idx = todos.findIndex((el) => el.id === params.id);
+
+    if (idx === -1) {
+      createError("todos is not found", 400);
+    }
+
+    const {
+      title = todos[idx].title,
+      completed = todos[idx].completed,
+      dueDate = todos[idx].dueDate,
+    } = req.body;
+
+    if (typeof title !== "string") {
+      // return res.status(400).json({ message: "title must be a string" });
+      createError("title must be a string", 400);
+    }
+
+    if (validator.isEmpty(title)) {
+      //   return res.status(400).json({ message: "title is require" });
+      createError("title is require", 400);
+    }
+
+    if (typeof completed != "boolean") {
+      //   return res.status(400).json({ message: "completed must be a boolean" });
+      createError("completed must be a boolean", 400);
+    }
+
+    if (dueDate !== null && !validator.isDate(dueDate + " ")) {
+      //   return res.status(400).json({ message: "dueDate must be a date string" });
+      createError("dueDate must be a date string", 400);
+    }
+
+    todos[idx] = {
+      id: params.id,
+      title,
+      completed,
+      dueDate: dueDate === null ? dueDate : new Date(dueDate),
+    };
+
+    await writeTodo(todos);
+    res.json({ todo: todos[idx] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.use((err, req, res, next) => {
   res.status(res.statusCode || 500).json({ message: err.message });
 });
 
-app.listen(8888, () => console.log("Sever is running on port 8888"));
+app.listen(8881, () => console.log("Sever is running on port 8881"));
