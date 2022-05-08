@@ -3,6 +3,8 @@ const createError = require("../utility/createError");
 const { v4: uuidv4 } = require("uuid");
 const { readTodos, writeTodo } = require("../services/todoService");
 
+const Todo = require("../models/todoModel");
+
 //TODO create todo: POST/todos
 //? BODY: title(require), completed(default:fault), dueDate(date format)
 //* validator
@@ -33,17 +35,37 @@ exports.createTodo = async (req, res, next) => {
       //   return res.status(400).json({ message: "dueDate must be a date string" });
       createError("dueDate must be a date string", 400);
     }
+    //?............normal...................
+    // const todos = await Todo.findAll();
+    // const todo = {
+    //   id: uuidv4(),
+    //   title,
+    //   completed,
+    //   dueDate: dueDate === null ? dueDate : new Date(dueDate),
+    // };
+    // todos.push(todo);
+    //?............normal...................
 
-    const todos = await readTodos();
-    const todo = {
-      id: uuidv4(),
+    // await writeTodo(todos);
+
+    //?................ static...............
+    // const todo = {
+    //   title,
+    //   completed,
+    //   dueDate: dueDate === null ? dueDate : new Date(dueDate), // dueDate && new Date(dueDate)
+    // };
+
+    // await Todo.create(todo);
+    //?................ static...............
+
+    //?................instance...............
+    const todo = new Todo(
       title,
       completed,
-      dueDate: dueDate === null ? dueDate : new Date(dueDate),
-    };
-    todos.push(todo);
-
-    await writeTodo(todos);
+      dueDate === null ? dueDate : new Date(dueDate)
+    );
+    await todo.save();
+    //?................instance...............
 
     res.json({ todo });
   } catch (err) {
